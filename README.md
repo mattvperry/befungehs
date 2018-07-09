@@ -1,3 +1,3 @@
 # befungehs
 
-Basic befunge interpreter written in Haskell
+Basic befunge93 interpreter written in Haskell
