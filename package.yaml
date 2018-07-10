@@ -1,10 +1,10 @@
 name:                befungehs
 version:             0.1.0.0
-github:              "githubuser/befungehs"
+github:              "mattvperry/befungehs"
 license:             BSD3
-author:              "Author name here"
+author:              "Matt Perry"
 maintainer:          "example@example.com"
-copyright:           "2018 Author name here"
+copyright:           "2018 Matt Perry"
 
 extra-source-files:
 - README.md
@@ -17,8 +17,22 @@ extra-source-files:
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/githubuser/befungehs#readme>
+description:         Please see the README on GitHub at <https://github.com/mattvperry/befungehs#readme>
 
+default-extensions:
+- RankNTypes
+- TypeFamilies
+- TupleSections
+- RecordWildCards
+- LambdaCase
+- FlexibleContexts
+- ConstraintKinds
+- TemplateHaskell
+- GADTs
+- KindSignatures
+- FlexibleInstances
+- MultiParamTypeClasses
+- UndecidableInstances
 dependencies:
 - base >= 4.7 && < 5
 - vector
@@ -27,6 +41,7 @@ dependencies:
 - split
 - transformers
 - random
+- MonadPrompt
 
 library:
   source-dirs: src

@@ -1,11 +1,20 @@
 module Main where
 
-import           Control.Lens
-import           App                                      ( runProgram )
-import           System.Random                            ( newStdGen )
+import Interpreter (Interpreter, Command(..), runProgram)
+import Control.Monad (unless)
+import System.Environment (getArgs)
+import System.Random (newStdGen)
+
+interpret :: Interpreter IO a
+interpret (COutNum n) = putStr . show $ n
+interpret (COutChr c) = putChar c
+interpret CInNum      = readLn :: IO Int
+interpret CInChr      = getChar
 
 main :: IO ()
---main = putStrLn . (maybe "" show) . parse $ ">987v>.v\nv456<  :\n>321 ^ _@"
 main = do
+    args <- getArgs
+    unless (length args == 1) (error "supply a file path")
+    p <- readFile . head $ args
     g <- newStdGen
-    print . runProgram g $ ">987v>.v\nv456<  :\n>321 ^ _@"
+    runProgram interpret g p
