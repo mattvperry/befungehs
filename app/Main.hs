@@ -1,16 +1,9 @@
 module Main where
 
-import Interpreter (MonadBefunge(..), runProgram)
+import Interpreter (runProgram)
 import Control.Monad (unless)
 import System.Environment (getArgs)
 import System.Random (newStdGen)
-import System.IO (hFlush, stdout)
-
-instance MonadBefunge IO where
-    tellInt  n = (putStr . show $ n) >> hFlush stdout
-    tellChar c = putChar c >> hFlush stdout
-    askInt     = readLn
-    askChar    = head <$> getLine
 
 main :: IO ()
 main = do
