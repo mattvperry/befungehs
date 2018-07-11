@@ -1,33 +1,34 @@
 module Interpreter
-    ( Interpreter
-    , Command(..)
+    ( MonadBefunge(..)
     , runProgram
     )
 where
 
-import Instructions (Command(..), step)
+import Instructions (MonadBefunge(..), step)
 import Program (Program, load)
 import Control.Applicative (many)
-import Control.Monad.Prompt (MonadPrompt(..), Prompt, runPromptM)
 import Control.Monad.State (StateT, execStateT, lift)
 import Control.Monad.Trans.Maybe (MaybeT, runMaybeT)
 import System.Random (StdGen)
 
-type Interpreter m a = Command a -> m a
-type Machine = Prompt Command
-type App = MaybeT (StateT Program Machine)
+type App m = MaybeT (StateT Program m)
 
-execApp :: App a -> Program -> Machine Program
+execApp :: (Monad m, MonadBefunge m) => App m a -> Program -> m Program
 execApp = execStateT . runMaybeT
 
-runProgram
-    :: Monad m => (forall a . Interpreter m a) -> StdGen -> String -> m ()
-runProgram i g s = do
-    runPromptM i . execApp (many step) . load g $ s
+runProgram :: (Monad m, MonadBefunge m) => StdGen -> String -> m ()
+runProgram g s = do
+    execApp (many step) . load g $ s
     return ()
 
-instance (Monad m, MonadPrompt p m) => MonadPrompt p (MaybeT m) where
-    prompt = lift . prompt
+instance (Monad m, MonadBefunge m) => MonadBefunge (StateT s m) where
+    tellChar = lift . tellChar
+    tellInt  = lift . tellInt
+    askChar  = lift askChar
+    askInt   = lift askInt
 
-instance (Monad m, MonadPrompt p m) => MonadPrompt p (StateT s m) where
-    prompt = lift . prompt
+instance (Monad m, MonadBefunge m) => MonadBefunge (MaybeT m) where
+    tellChar = lift . tellChar
+    tellInt  = lift . tellInt
+    askChar  = lift askChar
+    askInt   = lift askInt

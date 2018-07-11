@@ -1,5 +1,5 @@
 module Instructions
-    ( Command(..)
+    ( MonadBefunge(..)
     , step
     )
 where
@@ -9,18 +9,17 @@ import PlayField (Dir(..), move)
 import Control.Applicative (many)
 import Control.Lens (use, preuse, ix, uncons, (%=), (.=))
 import Control.Monad (MonadPlus, mzero)
-import Control.Monad.Prompt (MonadPrompt, prompt)
 import Control.Monad.State (MonadState)
 import Data.Char (isDigit, digitToInt, chr, ord)
 import System.Random (random)
 
-type MonadApp m = (MonadPrompt Command m, MonadPlus m, MonadState Program m)
+type MonadApp m = (MonadBefunge m, MonadPlus m, MonadState Program m)
 
-data Command :: * -> * where
-    COutNum :: Int -> Command ()
-    COutChr :: Char -> Command ()
-    CInNum  :: Command Int
-    CInChr  :: Command Char
+class MonadBefunge m where
+    askInt   :: m Int
+    askChar  :: m Char
+    tellInt  :: Int -> m ()
+    tellChar :: Char -> m ()
 
 step :: MonadApp m => m ()
 step = stepWith exec
@@ -72,10 +71,10 @@ exec ':'           = peek >>= push
 exec '$'           = pop >> return ()
 exec '@'           = mzero
 exec ' '           = return ()
-exec '.'           = pop >>= prompt . COutNum
-exec ','           = pop >>= prompt . COutChr . chr
-exec '&'           = prompt CInNum >>= push
-exec '~'           = prompt CInChr >>= push . ord
+exec '.'           = pop >>= tellInt
+exec ','           = pop >>= tellChar . chr
+exec '&'           = askInt >>= push
+exec '~'           = askChar >>= push . ord
 exec '\\'          = do
     x <- pop
     y <- pop

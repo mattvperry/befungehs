@@ -1,16 +1,16 @@
 module Main where
 
-import Interpreter (Interpreter, Command(..), runProgram)
+import Interpreter (MonadBefunge(..), runProgram)
 import Control.Monad (unless)
 import System.Environment (getArgs)
 import System.Random (newStdGen)
 import System.IO (hFlush, stdout)
 
-interpret :: Interpreter IO a
-interpret (COutNum n) = (putStr . show $ n) >> hFlush stdout
-interpret (COutChr c) = putChar c >> hFlush stdout
-interpret CInNum      = readLn :: IO Int
-interpret CInChr      = getChar
+instance MonadBefunge IO where
+    tellInt  n = (putStr . show $ n) >> hFlush stdout
+    tellChar c = putChar c >> hFlush stdout
+    askInt     = readLn
+    askChar    = head <$> getLine
 
 main :: IO ()
 main = do
@@ -18,4 +18,4 @@ main = do
     unless (length args == 1) (error "supply a file path")
     p <- readFile . head $ args
     g <- newStdGen
-    runProgram interpret g p
+    runProgram g p

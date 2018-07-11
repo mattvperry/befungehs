@@ -41,7 +41,6 @@ dependencies:
 - split
 - transformers
 - random
-- MonadPrompt
 
 library:
   source-dirs: src
