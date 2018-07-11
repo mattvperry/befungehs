@@ -11,17 +11,17 @@ where
 
 import PlayField (PlayField, Pos, Dir(R), parse)
 import Control.Lens (makeLenses)
-import System.Random (StdGen)
+import System.Random (RandomGen)
 
-data Program = Program
+data Program g = Program
     { _cursor   :: Pos
     , _dir      :: Dir
     , _stack    :: [Int]
-    , _gen      :: StdGen
+    , _gen      :: g
     , _field    :: PlayField
     }
     deriving (Show)
 makeLenses ''Program
 
-load :: StdGen -> String -> Program
+load :: (RandomGen g) => g -> String -> Program g
 load g = Program (0, 0) R [] g . parse

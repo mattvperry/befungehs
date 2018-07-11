@@ -11,51 +11,51 @@ import Control.Lens (use, preuse, ix, uncons, (%=), (.=))
 import Control.Monad (MonadPlus, mzero)
 import Control.Monad.State (MonadState)
 import Data.Char (isDigit, digitToInt, chr, ord)
-import System.Random (random)
+import System.Random (RandomGen, random)
 
-type MonadApp m = (MonadBefunge m, MonadPlus m, MonadState Program m)
+type MonadApp g m = (RandomGen g, MonadBefunge m, MonadPlus m, MonadState (Program g) m)
 
-class MonadBefunge m where
+class (Monad m) => MonadBefunge m where
     askInt   :: m Int
     askChar  :: m Char
     tellInt  :: Int -> m ()
     tellChar :: Char -> m ()
 
-step :: MonadApp m => m ()
+step :: MonadApp g m => m ()
 step = stepWith exec
 
-stepWith :: MonadApp m => (Char -> m ()) -> m ()
+stepWith :: MonadApp g m => (Char -> m ()) -> m ()
 stepWith f = do
     p      <- use cursor
     Just c <- preuse $ field . ix p
     f c >> advance
 
-advance :: MonadApp m => m ()
+advance :: MonadApp g m => m ()
 advance = do
     d <- use dir
     p <- use field
     cursor %= move p d
 
-peek :: MonadApp m => m Int
+peek :: MonadApp g m => m Int
 peek = use stack >>= return . maybe 0 fst . uncons
 
-pop :: MonadApp m => m Int
+pop :: MonadApp g m => m Int
 pop = use stack >>= maybe (return 0) f . uncons
     where f (x, xs) = stack .= xs >> return x
 
-popPair :: MonadApp m => m (Int, Int)
+popPair :: MonadApp g m => m (Int, Int)
 popPair = do
     y <- pop
     x <- pop
     return (x, y)
 
-push :: MonadApp m => Int -> m ()
+push :: MonadApp g m => Int -> m ()
 push x = stack %= (x :)
 
-doOp :: MonadApp m => (Int -> Int -> a) -> (a -> m ()) -> m ()
+doOp :: MonadApp g m => (Int -> Int -> a) -> (a -> m ()) -> m ()
 doOp f g = uncurry f <$> popPair >>= g
 
-exec :: MonadApp m => Char -> m ()
+exec :: MonadApp g m => Char -> m ()
 exec c | isDigit c = push . digitToInt $ c
 exec '^'           = dir .= U
 exec 'v'           = dir .= D

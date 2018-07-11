@@ -9,25 +9,25 @@ import Program (Program, load)
 import Control.Applicative (many)
 import Control.Monad.State (StateT, execStateT, lift)
 import Control.Monad.Trans.Maybe (MaybeT, runMaybeT)
-import System.Random (StdGen)
+import System.Random (RandomGen)
 
-type App m = MaybeT (StateT Program m)
+type App g m = MaybeT (StateT (Program g) m)
 
-execApp :: (Monad m, MonadBefunge m) => App m a -> Program -> m Program
+execApp :: (RandomGen g, MonadBefunge m) => App g m a -> Program g -> m (Program g)
 execApp = execStateT . runMaybeT
 
-runProgram :: (Monad m, MonadBefunge m) => StdGen -> String -> m ()
+runProgram :: (RandomGen g, MonadBefunge m) => g -> String -> m ()
 runProgram g s = do
     execApp (many step) . load g $ s
     return ()
 
-instance (Monad m, MonadBefunge m) => MonadBefunge (StateT s m) where
+instance MonadBefunge m => MonadBefunge (StateT s m) where
     tellChar = lift . tellChar
     tellInt  = lift . tellInt
     askChar  = lift askChar
     askInt   = lift askInt
 
-instance (Monad m, MonadBefunge m) => MonadBefunge (MaybeT m) where
+instance MonadBefunge m => MonadBefunge (MaybeT m) where
     tellChar = lift . tellChar
     tellInt  = lift . tellInt
     askChar  = lift askChar
